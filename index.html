@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CryptoTax Pro — Free Crypto Tax Calculator</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;color:#e5e5e5;font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;min-height:100vh}
+
+nav{padding:18px 32px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #141414}
+.logo{font-size:1.1rem;font-weight:800;color:#fff;letter-spacing:-.02em}
+.logo span{color:#22c55e}
+.nav-badge{background:#22c55e18;color:#22c55e;font-size:.75rem;font-weight:700;padding:5px 12px;border-radius:100px;border:1px solid #22c55e33}
+
+.hero{text-align:center;padding:56px 24px 40px}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:14px}
+.hero h1 span{color:#22c55e}
+.hero p{color:#666;font-size:1rem;max-width:480px;margin:0 auto 8px;line-height:1.6}
+.hero .sub{color:#444;font-size:.82rem}
+
+.main{max-width:900px;margin:0 auto;padding:0 20px 80px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:640px){.main{grid-template-columns:1fr}}
+
+.card{background:#111;border:1px solid #1e1e1e;border-radius:16px;padding:28px}
+.card h2{font-size:1rem;font-weight:700;margin-bottom:20px;color:#aaa;text-transform:uppercase;letter-spacing:.06em;font-size:.78rem}
+
+.field{margin-bottom:18px}
+.field label{display:block;font-size:.82rem;color:#666;margin-bottom:7px;font-weight:500}
+.field input,.field select{
+  width:100%;background:#0d0d0d;border:1px solid #222;border-radius:8px;
+  padding:11px 14px;color:#e5e5e5;font-size:.95rem;outline:none;
+  transition:border-color .15s;font-family:inherit
+}
+.field input:focus,.field select:focus{border-color:#22c55e}
+.field select option{background:#111}
+
+.field .prefix-wrap{position:relative}
+.field .prefix-wrap::before{content:"$";position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#444;font-size:.95rem}
+.field .prefix-wrap input{padding-left:26px}
+
+.toggle-group{display:flex;gap:8px}
+.toggle-btn{flex:1;background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:10px;color:#666;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s;text-align:center}
+.toggle-btn.active{background:#22c55e18;border-color:#22c55e;color:#22c55e}
+
+.calc-btn{width:100%;margin-top:8px;background:#22c55e;color:#000;font-weight:800;font-size:1rem;padding:14px;border-radius:10px;border:none;cursor:pointer;transition:opacity .15s}
+.calc-btn:hover{opacity:.88}
+
+/* Results */
+.result-card{background:#111;border:1px solid #1e1e1e;border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:0}
+.result-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;color:#333;padding:40px 0}
+.result-placeholder svg{margin-bottom:16px;opacity:.3}
+.result-placeholder p{font-size:.88rem}
+
+.result-total{text-align:center;padding-bottom:24px;margin-bottom:24px;border-bottom:1px solid #1a1a1a}
+.result-total .label{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:#555;margin-bottom:8px}
+.result-total .amount{font-size:2.8rem;font-weight:800;color:#f87171;letter-spacing:-.03em}
+.result-total .sub{color:#444;font-size:.8rem;margin-top:4px}
+
+.breakdown{display:flex;flex-direction:column;gap:0}
+.breakdown-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #141414;font-size:.88rem}
+.breakdown-row:last-child{border-bottom:none}
+.breakdown-row .name{color:#666}
+.breakdown-row .val{font-weight:700;color:#e5e5e5}
+.breakdown-row.total-row .name{color:#aaa;font-weight:700}
+.breakdown-row.total-row .val{color:#f87171}
+
+.after-tax{background:#0d1a0d;border:1px solid #22c55e22;border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.after-tax .label{font-size:.82rem;color:#22c55e88}
+.after-tax .val{font-size:1.1rem;font-weight:800;color:#22c55e}
+
+/* CTA */
+.cta-section{margin:32px 20px 0;max-width:900px;margin-left:auto;margin-right:auto}
+.cta-card{background:linear-gradient(135deg,#0a1a0a,#0d1f0d);border:1px solid #22c55e33;border-radius:16px;padding:32px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+@media(max-width:600px){.cta-card{grid-template-columns:1fr}}
+.cta-card h3{font-size:1.1rem;font-weight:800;margin-bottom:8px}
+.cta-card p{color:#666;font-size:.88rem;line-height:1.6}
+.cta-card .cta-btns{display:flex;flex-direction:column;gap:10px;min-width:180px}
+.cta-btn{display:block;text-align:center;padding:12px 24px;border-radius:9px;font-weight:700;font-size:.9rem;text-decoration:none;white-space:nowrap;transition:opacity .15s}
+.cta-btn:hover{opacity:.85}
+.cta-btn.primary{background:#22c55e;color:#000}
+.cta-btn.secondary{background:#141414;color:#aaa;border:1px solid #222}
+
+/* Disclaimer */
+.disclaimer{text-align:center;color:#333;font-size:.75rem;padding:24px;max-width:600px;margin:0 auto;line-height:1.6}
+
+/* Pill tags */
+.pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:32px}
+.pill{background:#141414;border:1px solid #1e1e1e;color:#555;font-size:.75rem;padding:5px 12px;border-radius:100px}
+.pill span{color:#22c55e}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Crypto<span>Tax</span> Pro</div>
+  <div class="nav-badge">Free Calculator</div>
+</nav>
+
+<div class="hero">
+  <h1>How much will the IRS<br/><span>actually take?</span></h1>
+  <p>Free crypto capital gains calculator with federal, New York State, and NYC tax breakdown.</p>
+  <p class="sub">No signup. No data stored. Results in seconds.</p>
+</div>
+
+<div class="pills">
+  <div class="pill">Federal <span>✓</span></div>
+  <div class="pill">NY State <span>✓</span></div>
+  <div class="pill">NYC <span>✓</span></div>
+  <div class="pill">Short &amp; Long Term <span>✓</span></div>
+  <div class="pill">2025 Tax Rates <span>✓</span></div>
+</div>
+
+<div class="main">
+  <!-- Input Card -->
+  <div class="card">
+    <h2>Your Trade Details</h2>
+
+    <div class="field">
+      <label>Total crypto gains (profit only)</label>
+      <div class="prefix-wrap"><input type="number" id="gains" placeholder="10,000" min="0"/></div>
+    </div>
+
+    <div class="field">
+      <label>Holding period</label>
+      <div class="toggle-group">
+        <div class="toggle-btn active" id="btn-short" onclick="setHolding('short')">Short-term<br/><span style="font-size:.75rem;font-weight:400;color:inherit">&lt; 1 year</span></div>
+        <div class="toggle-btn" id="btn-long" onclick="setHolding('long')">Long-term<br/><span style="font-size:.75rem;font-weight:400;color:inherit">&gt; 1 year</span></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Annual income (excluding crypto gains)</label>
+      <div class="prefix-wrap"><input type="number" id="income" placeholder="75,000" min="0"/></div>
+    </div>
+
+    <div class="field">
+      <label>State</label>
+      <select id="state">
+        <option value="ny">New York (+ NYC)</option>
+        <option value="other">Other US state</option>
+        <option value="none">No state income tax</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Filing status</label>
+      <select id="filing">
+        <option value="single">Single</option>
+        <option value="married">Married filing jointly</option>
+        <option value="hoh">Head of household</option>
+      </select>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">Calculate My Tax →</button>
+  </div>
+
+  <!-- Result Card -->
+  <div class="result-card" id="result-card">
+    <div class="result-placeholder" id="placeholder">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M13 3h8m0 0v8m0-8L11 13"/></svg>
+      <p>Enter your details and click<br/>Calculate to see your tax breakdown</p>
+    </div>
+    <div id="results" style="display:none">
+      <div class="result-total">
+        <div class="label">Estimated total tax on gains</div>
+        <div class="amount" id="total-tax">$0</div>
+        <div class="sub" id="eff-rate">Effective rate: 0%</div>
+      </div>
+      <div class="breakdown">
+        <div class="breakdown-row"><span class="name">Federal capital gains tax</span><span class="val" id="fed-tax">$0</span></div>
+        <div class="breakdown-row" id="ny-row"><span class="name">NY State income tax</span><span class="val" id="ny-tax">$0</span></div>
+        <div class="breakdown-row" id="nyc-row"><span class="name">NYC local tax</span><span class="val" id="nyc-tax">$0</span></div>
+        <div class="breakdown-row" id="niit-row"><span class="name">Net Investment Income Tax (3.8%)</span><span class="val" id="niit-tax">$0</span></div>
+      </div>
+      <div class="after-tax">
+        <span class="label">You keep</span>
+        <span class="val" id="keep-amount">$0</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section" id="cta-section" style="display:none">
+  <div class="cta-card">
+    <div>
+      <h3>This is an estimate. Your actual bill depends on every trade.</h3>
+      <p>Koinly automatically imports all your transactions from 700+ exchanges and wallets, calculates your exact gain/loss, and generates an IRS-ready tax report. Used by 500,000+ crypto investors.</p>
+    </div>
+    <div class="cta-btns">
+      <a href="https://koinly.io/?via=25ED9818&amp;utm_source=affiliate" class="cta-btn primary" target="_blank">Get Exact Report on Koinly →</a>
+      <a href="https://koinly.io/?via=25ED9818&amp;utm_source=affiliate" class="cta-btn secondary" target="_blank">Also try Koinly free</a>
+    </div>
+  </div>
+</div>
+
+<p class="disclaimer">This calculator provides estimates only and does not constitute tax advice. Consult a qualified tax professional for your specific situation. Tax laws change — verify current rates with the IRS and NY Department of Taxation.</p>
+
+<script>
+let holding = 'short';
+
+function setHolding(type) {
+  holding = type;
+  document.getElementById('btn-short').classList.toggle('active', type === 'short');
+  document.getElementById('btn-long').classList.toggle('active', type === 'long');
+}
+
+function fmt(n) {
+  return '$' + Math.round(n).toLocaleString();
+}
+
+function getFederalRate(gains, income, holding, filing) {
+  const totalIncome = income + gains;
+  if (holding === 'short') {
+    // Ordinary income rates 2025
+    const brackets = {
+      single:  [[11925,0.10],[48475,0.12],[103350,0.22],[197300,0.24],[250525,0.32],[626350,0.35],[Infinity,0.37]],
+      married: [[23850,0.10],[96950,0.12],[206700,0.22],[394600,0.24],[501050,0.32],[751600,0.35],[Infinity,0.37]],
+      hoh:     [[17000,0.10],[64850,0.12],[103350,0.22],[197300,0.24],[250500,0.32],[626350,0.35],[Infinity,0.37]],
+    };
+    const b = brackets[filing];
+    let taxTotal = 0, taxBase = 0, prev = 0;
+    for (const [limit, rate] of b) {
+      const bracket = Math.min(totalIncome, limit) - prev;
+      const baseInBracket = Math.min(income, limit) - Math.min(income, prev);
+      if (bracket > baseInBracket) taxTotal += (bracket - Math.max(0, baseInBracket)) * rate;
+      prev = limit;
+      if (prev >= totalIncome) break;
+    }
+    return taxTotal;
+  } else {
+    // Long-term capital gains rates 2025
+    const thresholds = {
+      single:  [[48350,0],[533400,0.15],[Infinity,0.20]],
+      married: [[96700,0],[600050,0.15],[Infinity,0.20]],
+      hoh:     [[64750,0],[566700,0.15],[Infinity,0.20]],
+    };
+    const t = thresholds[filing];
+    let tax = 0, prev = 0;
+    for (const [limit, rate] of t) {
+      const gainsInBracket = Math.max(0, Math.min(gains, limit - income) - Math.max(0, prev - income));
+      tax += gainsInBracket * rate;
+      prev = limit;
+      if (income + gains <= prev) break;
+    }
+    return tax;
+  }
+}
+
+function calculate() {
+  const gains  = parseFloat(document.getElementById('gains').value) || 0;
+  const income = parseFloat(document.getElementById('income').value) || 0;
+  const state  = document.getElementById('state').value;
+  const filing = document.getElementById('filing').value;
+
+  if (gains <= 0) { alert('Please enter your crypto gains.'); return; }
+
+  const fedTax = getFederalRate(gains, income, holding, filing);
+
+  // NIIT: 3.8% on gains if income+gains > $200k single / $250k married
+  const niitThreshold = filing === 'married' ? 250000 : 200000;
+  const niit = (income + gains > niitThreshold) ? gains * 0.038 : 0;
+
+  // NY State: progressive, up to 10.9% (simplified marginal on gains)
+  let nyTax = 0, nycTax = 0;
+  if (state === 'ny') {
+    const totalIncome = income + gains;
+    // NY rates 2025 (single, approximate)
+    const nyBrackets = [[17150,0.04],[23600,0.045],[27900,0.0525],[161550,0.0585],[323200,0.0625],[2155350,0.0685],[25000000,0.0965],[Infinity,0.109]];
+    let prev = 0, nyTotal = 0, nyBase = 0;
+    for (const [limit, rate] of nyBrackets) {
+      const inBracket = Math.min(totalIncome, limit) - prev;
+      const baseInBracket = Math.min(income, limit) - Math.min(income, prev);
+      if (inBracket > baseInBracket) nyTotal += (inBracket - Math.max(0, baseInBracket)) * rate;
+      prev = limit;
+      if (prev >= totalIncome) break;
+    }
+    nyTax = nyTotal;
+    nycTax = gains * 0.03876; // NYC flat marginal approximation
+  } else if (state === 'other') {
+    nyTax = gains * 0.05; // rough average state rate
+  }
+
+  const total = fedTax + nyTax + nycTax + niit;
+  const keep  = gains - total;
+  const effRate = (total / gains * 100).toFixed(1);
+
+  document.getElementById('placeholder').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('total-tax').textContent = fmt(total);
+  document.getElementById('eff-rate').textContent = `Effective rate on gains: ${effRate}%`;
+  document.getElementById('fed-tax').textContent = fmt(fedTax);
+  document.getElementById('keep-amount').textContent = fmt(keep);
+  document.getElementById('ny-row').style.display = state !== 'none' ? '' : 'none';
+  document.getElementById('nyc-row').style.display = state === 'ny' ? '' : 'none';
+  document.getElementById('niit-row').style.display = niit > 0 ? '' : 'none';
+  document.getElementById('ny-tax').textContent = fmt(nyTax);
+  document.getElementById('nyc-tax').textContent = fmt(nycTax);
+  document.getElementById('niit-tax').textContent = fmt(niit);
+  document.getElementById('cta-section').style.display = 'block';
+  document.getElementById('cta-section').scrollIntoView({behavior:'smooth', block:'start'});
+}
+</script>
+</body>
+</html>
